@@ -11,8 +11,9 @@
     :imgSrc="imgSrc"
     :img-width="width"
     img-alt="Card image"
+    @click="triggerCard"
   >
-    <b-card-body class="card-body">
+    <b-card-body>
       <slot name="body" />
     </b-card-body>
   </b-card>
@@ -34,6 +35,12 @@ export default class Card extends Vue {
     default: false,
   })
   private clickable!: boolean;
+
+  public triggerCard() {
+    if (this.clickable) {
+      this.$emit("onClick");
+    }
+  }
 }
 </script>
 <style lang="scss" scoped>

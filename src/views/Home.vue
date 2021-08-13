@@ -18,6 +18,9 @@
           :clickable="true"
           :width="100"
           :imgSrc="episode.itunes ? episode.itunes.image : ''"
+          @onClick="
+            $router.push({ name: 'Episode', params: { id: episode.guid } })
+          "
         >
           <template v-slot:body>
             <b-card-title>{{ episode.title }}</b-card-title>
@@ -31,9 +34,6 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
-import Parser from "rss-parser";
-
-import { Podcast } from "../types";
 
 import Card from "@/components/Card.vue";
 
@@ -43,18 +43,12 @@ import Card from "@/components/Card.vue";
   },
 })
 export default class Home extends Vue {
-  public url =
-    "https://feeds.soundon.fm/podcasts/954689a5-3096-43a4-a80b-7810b219cef3.xml";
-  public podcast: Podcast | null = null;
-
   public async created() {
-    this.fetch();
+    this.$store.dispatch("getPodcast");
   }
 
-  public async fetch() {
-    let parser = new Parser<Podcast>();
-    let podcast = await parser.parseURL(this.url);
-    this.podcast = podcast;
+  public get podcast() {
+    return this.$store.state.podcast;
   }
 }
 </script>
