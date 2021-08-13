@@ -1,17 +1,30 @@
 <template>
   <div class="home">
     <template v-if="podcast">
-      <b-card
-        no-body
-        img-left
+      <Card
+        :borded="true"
         :imgSrc="podcast.image ? podcast.image.url : ''"
-        :img-width="250"
-        img-alt="Card image"
+        :width="250"
       >
-        <b-card-body class="card-body">
+        <template v-slot:body>
           <b-card-title titleTag="h2">{{ podcast.title }}</b-card-title>
-        </b-card-body>
-      </b-card>
+          <b-card-text>{{ podcast.description }}</b-card-text>
+        </template>
+      </Card>
+      <b-card-group columns>
+        <Card
+          v-for="episode in podcast.items"
+          :key="episode.guid"
+          :clickable="true"
+          :width="100"
+          :imgSrc="episode.itunes ? episode.itunes.image : ''"
+        >
+          <template v-slot:body>
+            <b-card-title>{{ episode.title }}</b-card-title>
+            <b-card-sub-title>{{ episode.pubDate }}</b-card-sub-title>
+          </template>
+        </Card>
+      </b-card-group>
     </template>
   </div>
 </template>
@@ -22,7 +35,13 @@ import Parser from "rss-parser";
 
 import { Podcast } from "../types";
 
-@Component
+import Card from "@/components/Card.vue";
+
+@Component({
+  components: {
+    Card,
+  },
+})
 export default class Home extends Vue {
   public url =
     "https://feeds.soundon.fm/podcasts/954689a5-3096-43a4-a80b-7810b219cef3.xml";
