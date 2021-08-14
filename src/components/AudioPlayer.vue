@@ -10,6 +10,7 @@
       :type="audioInfo.type"
       @play="play"
       @loadedmetadata="setAudioMetaData"
+      @ended="onEnded"
     />
     <b-form-input
       class="w-100"
@@ -82,6 +83,10 @@ export default class AudioPlayer extends Vue {
     return this.$store.state.currentEpisode;
   }
 
+  private get episodeList(): Episode[] {
+    return this.$store.state.podcast.items;
+  }
+
   private get audioInfo() {
     return this.episode?.enclosure || {};
   }
@@ -95,6 +100,8 @@ export default class AudioPlayer extends Vue {
   }
 
   private setAudioMetaData() {
+    this.currentTime = 0;
+
     this.duration = this.$refs.audioElm.duration;
   }
 
@@ -141,6 +148,30 @@ export default class AudioPlayer extends Vue {
     this.isDraggingCurrentTime = false;
     this.currentTime = val;
     this.$refs.audioElm.currentTime = val;
+  }
+
+  private onEnded() {
+    this.clearTimer();
+    this.nextPlay();
+  }
+
+  private nextPlay() {
+    const currentIndex = this.episodeList.findIndex(
+      (o) => o.guid === this.episode?.guid
+    );
+    const isLast = currentIndex === 0;
+    console.log("isLast :>> ", isLast);
+    if (isLast) {
+      this.status = AudioStatus.PAUSE;
+      return;
+    }
+
+    const nextEpisode = this.episodeList[currentIndex - 1];
+    this.$store.commit("updateCurrentEpisode", nextEpisode);
+
+    this.$nextTick(() => {
+      this.play();
+    });
   }
 }
 </script>
