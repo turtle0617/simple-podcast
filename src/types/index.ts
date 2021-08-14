@@ -18,6 +18,11 @@ export interface Episode {
   link: string;
   pubDate: string;
   title: string;
+  enclosure?: {
+    length: string;
+    type: string;
+    url: string;
+  };
   itunes?: {
     author: string;
     duration: string;

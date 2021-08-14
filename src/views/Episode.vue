@@ -7,7 +7,9 @@
             <b-card-title titleTag="h2">{{ episode.title }}</b-card-title>
           </b-col>
           <b-col cols="2">
-            <b-button variant="outline-primary">play</b-button>
+            <b-button variant="outline-primary" @click="playEpisode"
+              >play</b-button
+            >
           </b-col>
         </b-row>
       </template>
@@ -55,6 +57,10 @@ export default class EpisodeInfo extends Vue {
 
   private get episode() {
     return this.podcast?.items.find((o) => o.guid === this.id);
+  }
+
+  private playEpisode() {
+    this.$store.commit("updateCurrentEpisode", this.episode);
   }
 }
 </script>
