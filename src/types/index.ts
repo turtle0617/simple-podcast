@@ -33,3 +33,8 @@ export interface Episode {
     summary: string;
   };
 }
+
+export enum AudioStatus {
+  PLAY = "play",
+  PAUSE = "pause",
+}

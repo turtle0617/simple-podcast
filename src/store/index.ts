@@ -2,7 +2,7 @@ import Vue from "vue";
 import Vuex from "vuex";
 import Parser from "rss-parser";
 
-import { Podcast, Episode } from "../types";
+import { Podcast, Episode, AudioStatus } from "../types";
 
 Vue.use(Vuex);
 
@@ -12,10 +12,12 @@ const PODCAST_URL =
 export default new Vuex.Store<{
   podcast: Podcast | null;
   currentEpisode: Episode | null;
+  currentEpisodeStatus: AudioStatus;
 }>({
   state: {
     podcast: null,
     currentEpisode: null,
+    currentEpisodeStatus: AudioStatus.PAUSE,
   },
   mutations: {
     updatePodcast(state, payload: Podcast) {
@@ -23,6 +25,9 @@ export default new Vuex.Store<{
     },
     updateCurrentEpisode(state, payload: Episode | null) {
       state.currentEpisode = payload;
+    },
+    updateCurrentEpisodeStatus(state, payload: AudioStatus) {
+      state.currentEpisodeStatus = payload;
     },
   },
   actions: {

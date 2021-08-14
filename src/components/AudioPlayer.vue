@@ -26,16 +26,16 @@
       <b-col cols="1">
         <b-button class="p-0" variant="outline">
           <b-icon
-            v-if="status === AudioStatus.PAUSE"
+            v-if="episodeStatus === AudioStatus.PAUSE"
             icon="play-circle"
             font-scale="2"
-            @click="() => triggerAction(AudioStatus.PLAY)"
+            @click="() => updateEpisodeStatus(AudioStatus.PLAY)"
           />
           <b-icon
             v-else
             icon="pause-circle"
             font-scale="2"
-            @click="() => triggerAction(AudioStatus.PAUSE)"
+            @click="() => updateEpisodeStatus(AudioStatus.PAUSE)"
           />
         </b-button>
       </b-col>
@@ -48,13 +48,8 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
-import { Episode } from "../types";
-
-enum AudioStatus {
-  PLAY = "play",
-  PAUSE = "pause",
-}
+import { Component, Vue, Watch } from "vue-property-decorator";
+import { Episode, AudioStatus } from "../types";
 
 const formatTime = (val: number) => {
   const time = Math.floor(val);
@@ -72,7 +67,6 @@ export default class AudioPlayer extends Vue {
     audioElm: HTMLAudioElement;
   };
   private AudioStatus = AudioStatus;
-  private status: AudioStatus = AudioStatus.PAUSE;
   private timer: number | null = null;
   private currentTime = 0;
   private progress = 0;
@@ -81,6 +75,10 @@ export default class AudioPlayer extends Vue {
 
   private get episode(): Episode | null {
     return this.$store.state.currentEpisode;
+  }
+
+  private get episodeStatus(): AudioStatus {
+    return this.$store.state.currentEpisodeStatus;
   }
 
   private get episodeList(): Episode[] {
@@ -105,10 +103,12 @@ export default class AudioPlayer extends Vue {
     this.duration = this.$refs.audioElm.duration;
   }
 
-  private triggerAction(status: AudioStatus) {
+  @Watch("episodeStatus")
+  private watchEpisodeStatus(status: AudioStatus) {
     if (status === AudioStatus.PLAY) this.play();
-    if (status === AudioStatus.PAUSE) this.pause();
+    else this.pause();
   }
+
   private async play() {
     try {
       await this.$refs.audioElm.play();
@@ -116,7 +116,7 @@ export default class AudioPlayer extends Vue {
       this.$nextTick(() => {
         this.clearTimer();
         this.timer = window.setInterval(this.playing, PROGRESS_INTERVAL);
-        this.status = AudioStatus.PLAY;
+        this.updateEpisodeStatus(AudioStatus.PLAY);
       });
     } catch (error) {
       console.error(error);
@@ -131,7 +131,7 @@ export default class AudioPlayer extends Vue {
   }
 
   private pause() {
-    this.status = AudioStatus.PAUSE;
+    this.updateEpisodeStatus(AudioStatus.PAUSE);
     this.$refs.audioElm.pause();
     this.clearTimer();
   }
@@ -160,9 +160,8 @@ export default class AudioPlayer extends Vue {
       (o) => o.guid === this.episode?.guid
     );
     const isLast = currentIndex === 0;
-    console.log("isLast :>> ", isLast);
     if (isLast) {
-      this.status = AudioStatus.PAUSE;
+      this.updateEpisodeStatus(AudioStatus.PAUSE);
       return;
     }
 
@@ -172,6 +171,10 @@ export default class AudioPlayer extends Vue {
     this.$nextTick(() => {
       this.play();
     });
+  }
+
+  private updateEpisodeStatus(status: AudioStatus) {
+    this.$store.commit("updateCurrentEpisodeStatus", status);
   }
 }
 </script>

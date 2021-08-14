@@ -7,8 +7,14 @@
             <b-card-title titleTag="h2">{{ episode.title }}</b-card-title>
           </b-col>
           <b-col cols="2">
-            <b-button variant="outline-primary" @click="playEpisode"
+            <b-button
+              v-if="!isEpisodePlaying"
+              variant="outline-primary"
+              @click="playEpisode"
               >play</b-button
+            >
+            <b-button v-else variant="outline-secondary" @click="pauseEpisode"
+              >pause</b-button
             >
           </b-col>
         </b-row>
@@ -25,7 +31,7 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
-import { Podcast, Episode } from "../types";
+import { Podcast, Episode, AudioStatus } from "../types";
 
 import Card from "@/components/Card.vue";
 
@@ -59,8 +65,32 @@ export default class EpisodeInfo extends Vue {
     return this.podcast?.items.find((o) => o.guid === this.id);
   }
 
+  private get playingEpisode(): Episode | null {
+    return this.$store.state.currentEpisode;
+  }
+
+  private get playingEpisodeStatus(): AudioStatus {
+    return this.$store.state.currentEpisodeStatus;
+  }
+
+  private get isPlayingEpisode() {
+    return this.episode?.guid === this.playingEpisode?.guid;
+  }
+
+  private get isEpisodePlaying() {
+    return (
+      this.isPlayingEpisode && this.playingEpisodeStatus === AudioStatus.PLAY
+    );
+  }
+
   private playEpisode() {
-    this.$store.commit("updateCurrentEpisode", this.episode);
+    if (this.isPlayingEpisode)
+      this.$store.commit("updateCurrentEpisodeStatus", AudioStatus.PLAY);
+    else this.$store.commit("updateCurrentEpisode", this.episode);
+  }
+
+  private pauseEpisode() {
+    this.$store.commit("updateCurrentEpisodeStatus", AudioStatus.PAUSE);
   }
 }
 </script>
