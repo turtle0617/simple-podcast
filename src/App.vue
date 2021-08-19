@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <div class="page">
+    <div class="page py-3">
       <b-container>
         <router-view />
       </b-container>
